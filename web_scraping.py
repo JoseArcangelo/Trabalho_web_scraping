@@ -43,6 +43,46 @@ def mostrar_dados(lst):
   for i in lst:
     print("Nome do jogo: " + i["Nome do jogo"] + "\nValor do jogo: " + i["Preco"] + "\n")
 
+def converter(valor):
+  valor = valor.replace("R$ ", "")
+  valor = valor.replace(",", ".")
+  valor = float(valor)
+  return valor
+
+
+def heapify_min(seq, n, i):
+    menor = i  
+    elemento_esquerda =2 * i + 1  
+    elemento_direita = 2 * i + 2
+
+    if elemento_esquerda < n:
+      valor_esq = converter(seq[elemento_esquerda]["Preco"])
+      valor_menor = converter(seq[menor]["Preco"])
+
+      if valor_esq < valor_menor:
+          menor =elemento_esquerda
+
+    if elemento_direita < n:
+      valor_dir = converter(seq[elemento_direita]["Preco"])
+      valor_menor = converter(seq[menor]["Preco"])
+      
+      if elemento_direita < n and valor_dir < valor_menor:
+          menor =elemento_direita
+
+    if menor != i:
+        seq[i], seq[menor] = seq[menor], seq[i]  
+        heapify_min(seq, n, menor)  
+
+def heap_sort_min(seq):
+    n = len(seq)
+
+    for i in range(n //2-1,-1,-1):
+        heapify_min(seq, n, i)
+    
+    for i in range(n-1,0,-1):
+        seq[i], seq[0] = seq[0], seq[i]
+        heapify_min(seq, i, 0)
+
 
 def main():
   while True:
@@ -54,8 +94,19 @@ def main():
       
     elif opc == "2":
       mostrar_dados(lst)
-    
+  
+    elif opc == "3":
+      heap_sort_min(lst)
+      lst.reverse()
+      print("DADOS ORDENADOS COM SUCESSO!")
+
+    elif opc == "4":
+      print(lst)
+      
     else:
       break
 
 main()
+
+
+
