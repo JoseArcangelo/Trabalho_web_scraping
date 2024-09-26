@@ -1,112 +1,157 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from time import sleep
-import os
+import os 
+import glob
+import subprocess
+import heapq
 
-def extrair():
-  url = "https://store.epicgames.com/pt-BR/collection/top-sellers"
+# funtion to merge temp files.
+# uses heap to perform k-way merge.
+# result will be sorted data
+def merge_file():
+    out = []                    
+    heap = []                   
+    mem = [[],[],[],[],[]]
 
-  # Inicializa um novo serviço para o ChromeDriver
-  service = Service()
-  # Permite definir opções para o navegador Chrome,
-  options = webdriver.ChromeOptions()
+    #create array of file handlers
+    pointers = [0]*5
+    for i in range(5):
+        file = '{}.txt'.format(i)
+        f = open(file,"r")
+        pointers[i] = (i,f)
+ 
+    # read first 100 lines of all file in mem
+    for i in range(5):
+        for j in range(100):
+            mem[i].append(pointers[i][1].readline())
 
-  #Cria uma nova instancia no navegador usando o serviço e as opções definidas anteriormente.
-  driver = webdriver.Chrome(service = service, options = options)
-  driver.get(url)
-  
-  sleep(3)
-  os.system('cls')
-  print("Carregando...")
-  lista_jogos = driver.find_elements(By.CLASS_NAME, 'css-g3jcms')
-  
-  lst = []
-  for jogo in lista_jogos:
-    j = jogo.text
-    j = j.split("\n")
-    jogo_obj = transformar(j)
-    lst.append(jogo_obj)
-  
-  driver.quit()
-  print("DADOS COLETADOS COM SUCESSO!")
-  return lst
-  
-def transformar(jogo): 
-  jogo_obj = {}
-  jogo_obj["Nome do jogo"] = jogo[1]
-  jogo_obj["Preco"] = jogo[-1]
-      
-  return jogo_obj
+    # initiate heap with first value from all mem parts
+    for i in range(len(mem)):
+        heapq.heappush(heap,(mem[i][2],i))
 
-def mostrar_dados(lst):
-  for i in lst:
-    print("Nome do jogo: " + i["Nome do jogo"] + "\nValor do jogo: " + i["Preco"] + "\n")
-
-def converter(valor):
-  valor = valor.replace("R$ ", "")
-  valor = valor.replace(",", ".")
-  valor = float(valor)
-  return valor
-
-
-def heapify_min(seq, n, i):
-    menor = i  
-    elemento_esquerda =2 * i + 1  
-    elemento_direita = 2 * i + 2
-
-    if elemento_esquerda < n:
-      valor_esq = converter(seq[elemento_esquerda]["Preco"])
-      valor_menor = converter(seq[menor]["Preco"])
-
-      if valor_esq < valor_menor:
-          menor =elemento_esquerda
-
-    if elemento_direita < n:
-      valor_dir = converter(seq[elemento_direita]["Preco"])
-      valor_menor = converter(seq[menor]["Preco"])
-      
-      if elemento_direita < n and valor_dir < valor_menor:
-          menor =elemento_direita
-
-    if menor != i:
-        seq[i], seq[menor] = seq[menor], seq[i]  
-        heapify_min(seq, n, menor)  
-
-def heap_sort_min(seq):
-    n = len(seq)
-
-    for i in range(n //2-1,-1,-1):
-        heapify_min(seq, n, i)
     
-    for i in range(n-1,0,-1):
-        seq[i], seq[0] = seq[0], seq[i]
-        heapify_min(seq, i, 0)
+    #initiate first push operation
+    val,ptr = heapq.heapreplace(heap,(mem[1].pop(0),1))
+    
+    #append result
+    out .append(val)
+
+    # loop until heap is empty
+    while heap:
+        #if any mem get exhausted refill it
+        #check if memory exhausted
+        if not mem[0]:
+            # check if file pointer for that memory exist
+            if pointers[0]:
+                for i in range(100):
+                    # readline
+                    line = pointers[0][1].readline()
+                    # if no data then close file make file pointer none and break
+                    if not line:
+                        pointers[0][1].close()
+                        pointers[0]=None
+                        break
+                    # else load line to memory
+                    mem[0].append(line)
+        # repeat for all memory
+        if not mem[1]:
+            if pointers[1]:
+                for i in range(100):
+                    line = pointers[1][1].readline()
+                    if not line:
+                        pointers[1][1].close()
+                        pointers[1]=None
+                        break
+                    mem[1].append(line)
+        if not mem[2]:
+            if pointers[2]:
+                for i in range(100):
+                    line = pointers[2][1].readline()
+                    if not line:
+                        pointers[2][1].close()
+                        pointers[2]=None
+                        break
+                    mem[2].append(line)
+        if not mem[3]:
+            if pointers[3]:
+                for i in range(100):
+                    line = pointers[3][1].readline()
+                    if not line:
+                        pointers[3][1].close()
+                        pointers[3]=None
+                        break
+                    mem[3].append(line)
+        if not mem[4]:
+            if pointers[4]:
+                for i in range(100):
+                    line = pointers[4][1].readline()
+                    if not line:
+                        pointers[4][1].close()
+                        pointers[4]=None
+                        break
+                    mem[4].append(line)
+        
+        # push next data into heap and append result to output
+        val,ptr = heapq.heappop(heap)
+        out.append(val.strip('\n'))
+
+        # push next data into the heap
+        if mem[ptr]:
+            heapq.heappush(heap,(mem[ptr].pop(0),ptr))
+        
+        # if output reach 100 lines write into file and flush output
+        if len(out) == 100:
+            with open("sorted","a") as file:
+                file.write("-----------wrote------\n")
+                for i in out:
+                    file.write(i+'\n')
+            out=[]
+                
+
+# Splitting and sosrting function. 
+# This function will create 5 temp files out of one big file. 
+# The data in temp files will be sorted.
+def split_file(file_name):
+    
+    count=0 
+    data = []
+    
+    # Getting the total line in the file and calculating temp file size(chunk_size)
+    out = subprocess.Popen(['wc', '-l', file_name],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    stdout,stderr = out.communicate()
+    total_lines = int(stdout.split()[0])+1
+    chunk_size = int(total_lines/5)+1
+
+    # Open big file 
+    large_file_handler = open(file_name)
+    
+    # Reading lines until file is over
+    while total_lines > 0:
+        
+        # Calculating the no. of line in file to be read (specially for ast file)
+        if total_lines < chunk_size:
+            chunk_size = total_lines
+            total_lines=0
+        total_lines = total_lines - chunk_size
+
+        # Reading lines from file into list and sort the list
+        data = [next(large_file_handler) for x in range(chunk_size)]
+        data.sort()    
+        
+        # Open temp file and write lines into temp file
+        small_filename = "{}.txt".format(count)
+        with open(small_filename,"w") as s_file:
+            for line in data:
+                s_file.write(line)
+        
+        # Empty the memory
+        count+=1
+        data=[]
 
 
-def main():
-  while True:
-    print("1- COLETAR DADOS" + "\n2- MOSTRAR DADOS" + "\n3- ORDENAR DADOS")
-    opc = input("Informe a opção desejada: ")
-    if opc == "1":
-      lst = extrair()
-      os.system('cls')
-      
-    elif opc == "2":
-      mostrar_dados(lst)
-  
-    elif opc == "3":
-      heap_sort_min(lst)
-      lst.reverse()
-      print("DADOS ORDENADOS COM SUCESSO!")
-
-    elif opc == "4":
-      print(lst)
-      
-    else:
-      break
-
-main()
-
-
-
+# program starts here
+if __name__ == "__main__":
+    
+    large_filename = "large"
+    # calling split funtion to make temp sorted files
+    split_file(large_filename)
+    # funtion to merge temp files
+    merge_file()
