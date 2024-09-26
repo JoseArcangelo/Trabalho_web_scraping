@@ -6,60 +6,107 @@ import os
 
 def extrair():
   url = "https://store.epicgames.com/pt-BR/collection/top-sellers"
-  headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
-  }
 
+  # Inicializa um novo serviço para o ChromeDriver
   service = Service()
+  # Permite definir opções para o navegador Chrome,
   options = webdriver.ChromeOptions()
 
+  #Cria uma nova instancia no navegador usando o serviço e as opções definidas anteriormente.
   driver = webdriver.Chrome(service = service, options = options)
-
   driver.get(url)
   
   sleep(3)
   os.system('cls')
   print("Carregando...")
-  element_text = driver.find_elements(By.CLASS_NAME, 'css-g3jcms')
+  lista_jogos = driver.find_elements(By.CLASS_NAME, 'css-g3jcms')
+  
   lst = []
-
-  for i in element_text:
-    lst.append(i.text)
-    lst.append("\n")
-
+  for jogo in lista_jogos:
+    j = jogo.text
+    j = j.split("\n")
+    jogo_obj = transformar(j)
+    lst.append(jogo_obj)
+  
   driver.quit()
-  lst = retirar_quebra_linha(lst)
-  
   print("DADOS COLETADOS COM SUCESSO!")
-      
   return lst
   
-def retirar_quebra_linha(lst):
-  for i in  range(len(lst)):
-    lst[i] = lst[i].replace('\n', ' ')
-  return lst
+def transformar(jogo): 
+  jogo_obj = {}
+  jogo_obj["Nome do jogo"] = jogo[1]
+  jogo_obj["Preco"] = jogo[-1]
+      
+  return jogo_obj
 
 def mostrar_dados(lst):
   for i in lst:
-    print(i)
+    print("Nome do jogo: " + i["Nome do jogo"] + "\nValor do jogo: " + i["Preco"] + "\n")
+
+def converter(valor):
+  valor = valor.replace("R$ ", "")
+  valor = valor.replace(",", ".")
+  valor = float(valor)
+  return valor
+
+
+def heapify_min(seq, n, i):
+    menor = i  
+    elemento_esquerda =2 * i + 1  
+    elemento_direita = 2 * i + 2
+
+    if elemento_esquerda < n:
+      valor_esq = converter(seq[elemento_esquerda]["Preco"])
+      valor_menor = converter(seq[menor]["Preco"])
+
+      if valor_esq < valor_menor:
+          menor =elemento_esquerda
+
+    if elemento_direita < n:
+      valor_dir = converter(seq[elemento_direita]["Preco"])
+      valor_menor = converter(seq[menor]["Preco"])
+      
+      if elemento_direita < n and valor_dir < valor_menor:
+          menor =elemento_direita
+
+    if menor != i:
+        seq[i], seq[menor] = seq[menor], seq[i]  
+        heapify_min(seq, n, menor)  
+
+def heap_sort_min(seq):
+    n = len(seq)
+
+    for i in range(n //2-1,-1,-1):
+        heapify_min(seq, n, i)
+    
+    for i in range(n-1,0,-1):
+        seq[i], seq[0] = seq[0], seq[i]
+        heapify_min(seq, i, 0)
+
 
 def main():
   while True:
     print("1- COLETAR DADOS" + "\n2- MOSTRAR DADOS" + "\n3- ORDENAR DADOS")
     opc = input("Informe a opção desejada: ")
-    
     if opc == "1":
       lst = extrair()
       os.system('cls')
       
     elif opc == "2":
-      
       mostrar_dados(lst)
+  
+    elif opc == "3":
+      heap_sort_min(lst)
+      lst.reverse()
+      print("DADOS ORDENADOS COM SUCESSO!")
+
+    elif opc == "4":
+      print(lst)
+      
     else:
       break
 
-
-
-      
-
 main()
+
+
+
