@@ -5,6 +5,7 @@ from time import sleep
 import os
 
 def extrair():
+  """Coleta os dados que se é desejado."""
   url = "https://store.epicgames.com/pt-BR/collection/top-sellers"
 
   # Inicializa um novo serviço para o ChromeDriver
@@ -22,35 +23,38 @@ def extrair():
   lista_jogos = driver.find_elements(By.CLASS_NAME, 'css-g3jcms')
   
   lst = []
- 
-  for jogo in lista_jogos:
-    j = jogo.text
-    j = j.split("\n")
-    jogo_obj = transformar(j)
-    lst.append(jogo_obj)
+  for elemento in lista_jogos:
+    jogo = elemento.text
+    print(elemento.text)
+    jogo = jogo.split("\n")
+    lst.append(organizar(jogo))
   
   driver.quit()
-  os.system('cls')
-  print("DADOS COLETADOS COM SUCESSO!")
+
+  print("\n\n::::DADOS COLETADOS COM SUCESSO!::::")
   return lst
   
-def transformar(jogo): 
-  jogo_obj = {}
-  jogo_obj["Nome do jogo"] = jogo[1]
-  jogo_obj["Preco"] = jogo[-1]
+def organizar(jogo):
+  """Organizado os dados que serão usados, em dicionários."""
+  jogo_dic = {}
+  jogo_dic["Nome do jogo"] = jogo[1]
+  jogo_dic["Preco"] = jogo[-1]
       
-  return jogo_obj
+  return jogo_dic
 
 def mostrar_dados(lst):
+  """Exibi os jogos e seus preços."""
+  print("\n::::::::::::::::::::::::")
   for i in lst:
-    print("Nome do jogo: " + i["Nome do jogo"] + "\nValor do jogo: " + i["Preco"] + "\n")
+    print("Nome do jogo: " + i["Nome do jogo"] + " Valor do jogo: " + i["Preco"] + "\n")
+  print("::::::::::::::::::::::::\n")
 
-def converter(valor):
+def converter_float(valor):
+  """Converte o preço do jogo, que está em String, para float."""
   valor = valor.replace("R$ ", "")
   valor = valor.replace(",", ".")
   valor = float(valor)
   return valor
-
 
 def heapify_min(seq, n, i):
     menor = i  
@@ -58,15 +62,15 @@ def heapify_min(seq, n, i):
     elemento_direita = 2 * i + 2
 
     if elemento_esquerda < n:
-      valor_esq = converter(seq[elemento_esquerda]["Preco"])
-      valor_menor = converter(seq[menor]["Preco"])
+      valor_esq = converter_float(seq[elemento_esquerda]["Preco"])
+      valor_menor = converter_float(seq[menor]["Preco"])
 
       if valor_esq < valor_menor:
-          menor =elemento_esquerda
+          menor = elemento_esquerda
 
     if elemento_direita < n:
-      valor_dir = converter(seq[elemento_direita]["Preco"])
-      valor_menor = converter(seq[menor]["Preco"])
+      valor_dir = converter_float(seq[elemento_direita]["Preco"])
+      valor_menor = converter_float(seq[menor]["Preco"])
       
       if elemento_direita < n and valor_dir < valor_menor:
           menor =elemento_direita
@@ -85,31 +89,32 @@ def heap_sort_min(seq):
         seq[i], seq[0] = seq[0], seq[i]
         heapify_min(seq, i, 0)
 
-
 def main():
   while True:
-    print("1- COLETAR DADOS" + "\n2- MOSTRAR DADOS" + "\n3- ORDENAR DADOS COM HEAP SORT" + "\n4- ORDENAR DADOS COM MERGESORT EXTERNO" + "\n5- SAIR")
+    print("::::CRAWLER::::" + "\n1- COLETAR DADOS" + "\n2- MOSTRAR DADOS" + "\n3- ORDENAR DADOS COM HEAP SORT" + "\n4- SAIR")
     opc = input("Informe a opção desejada: ")
-    os.system('cls')
+
     if opc == "1":
+      os.system('cls')
       lst = extrair()
-      
+
     elif opc == "2":
+      os.system('cls')
       mostrar_dados(lst)
-  
+
     elif opc == "3":
+      os.system('cls')
       heap_sort_min(lst)
       lst.reverse()
-      print("DADOS ORDENADOS COM SUCESSO!")
+      print("::::DADOS ORDENADOS COM SUCESSO!::::")
 
-    elif opc == "5":
+    elif opc == "4":
+      os.system('cls')
       print("Saindo...")
       break
       
     else:
-      print("VALOR INVÁLIDO!")
+      os.system('cls')
+      print("::::VALOR INVÁLIDO!::::")
 
 main()
-
-
-
