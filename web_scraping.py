@@ -89,6 +89,13 @@ def heap_sort_min(seq):
         seq[i], seq[0] = seq[0], seq[i]
         heapify_min(seq, i, 0)
 
+def gerar_arquivo_inicial(nome_arquivo, lst):
+    with open(nome_arquivo, 'w', encoding='utf-8') as arquivo:
+        for jogo in lst:
+          nome = jogo["Nome do jogo"]
+          preco = jogo["Preco"]
+          arquivo.write(f"{nome}; {preco}\n")
+
 def main():
   while True:
     print("::::CRAWLER::::" + "\n1- COLETAR DADOS" + "\n2- MOSTRAR DADOS" + "\n3- ORDENAR DADOS COM HEAP SORT" + "\n4- SAIR")
@@ -97,6 +104,7 @@ def main():
     if opc == "1":
       os.system('cls')
       lst = extrair()
+      gerar_arquivo_inicial("large.txt", lst)
 
     elif opc == "2":
       os.system('cls')
@@ -110,9 +118,10 @@ def main():
 
     elif opc == "4":
       os.system('cls')
+
       print("Saindo...")
       break
-      
+  
     else:
       os.system('cls')
       print("::::VALOR INVÁLIDO!::::")
