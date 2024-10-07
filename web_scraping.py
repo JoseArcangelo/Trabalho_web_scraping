@@ -22,6 +22,7 @@ def extrair():
   lista_jogos = driver.find_elements(By.CLASS_NAME, 'css-g3jcms')
   
   lst = []
+ 
   for jogo in lista_jogos:
     j = jogo.text
     j = j.split("\n")
@@ -87,7 +88,7 @@ def heap_sort_min(seq):
 
 def main():
   while True:
-    print("1- COLETAR DADOS" + "\n2- MOSTRAR DADOS" + "\n3- ORDENAR DADOS COM HEAP SORT" + "\n4- asdn" + "\n5- SAIR")
+    print("1- COLETAR DADOS" + "\n2- MOSTRAR DADOS" + "\n3- ORDENAR DADOS COM HEAP SORT" + "\n4- ORDENAR DADOS COM MERGESORT EXTERNO" + "\n5- SAIR")
     opc = input("Informe a opção desejada: ")
     os.system('cls')
     if opc == "1":
