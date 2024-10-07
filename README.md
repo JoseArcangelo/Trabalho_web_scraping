@@ -42,10 +42,7 @@ O código é estruturado em várias funções principais:
 4. O usuário pode então visualizar os dados, ordenar a lista de jogos com o alogoritmo de ordenação heap sort com base no preço e sair do programa.
 
 ### Requisitos
-
-- Python 3.x
 - Selenium
-- ChromeDriver
 
 ## AUTORES
 Bernardo
