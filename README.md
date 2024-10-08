@@ -20,6 +20,12 @@ Ordena os jogos coletados com base em seus preços utilizando o algoritmo Heap S
 ### 4. SAIR
 Finaliza o programa.
 
+## Bônus: Ordenação Externa
+O web scraping também possui o algoritmo de ordenação externa Merge Sort. Para executá-lo, é necessário:
+- **`1`**- Extrair os dados: Selecione a opção 1 no menu principal para coletar os dados da Epic Games Store. Isso gerará um arquivo chamado large.txt, contendo os dados dos jogos.
+- **`2`**- Executar o algoritmo: Com o arquivo large.txt gerado, basta rodar o arquico python.
+
+  
 ## CÓDIGO
 
 ### Estrutura do Código
